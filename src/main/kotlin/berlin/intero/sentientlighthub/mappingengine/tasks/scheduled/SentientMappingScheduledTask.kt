@@ -87,8 +87,10 @@ class SentientMappingScheduledTask {
 
         ConfigurationService.mappingConfig?.mappings?.forEach { mapping ->
 
-            // Call SentientMappingEvaluationAsyncTask
-            SimpleAsyncTaskExecutor().execute(SentientMappingEvaluationAsyncTask(mapping, valuesCurrent, valuesAverage))
+            if (valuesCurrent.isNotEmpty() && valuesAverage.isNotEmpty()) {
+                // Call SentientMappingEvaluationAsyncTask
+                SimpleAsyncTaskExecutor().execute(SentientMappingEvaluationAsyncTask(mapping, valuesCurrent, valuesAverage))
+            }
         }
     }
 }
