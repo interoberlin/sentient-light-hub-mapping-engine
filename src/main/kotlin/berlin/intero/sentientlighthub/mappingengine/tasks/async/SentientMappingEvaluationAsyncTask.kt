@@ -6,7 +6,7 @@ import berlin.intero.sentientlighthub.common.model.mapping.Mapping
 import berlin.intero.sentientlighthub.common.model.mapping.conditions.AbsoluteThresholdCondition
 import berlin.intero.sentientlighthub.common.model.mapping.conditions.DynamicThresholdCondition
 import berlin.intero.sentientlighthub.common.tasks.MQTTPublishAsyncTask
-import org.springframework.core.task.SimpleAsyncTaskExecutor
+import org.springframework.core.task.SyncTaskExecutor
 import java.util.logging.Logger
 
 /**
@@ -63,7 +63,7 @@ class SentientMappingEvaluationAsyncTask(
                 val mqttEvent = MQTTEvent(topic, action.value)
 
                 // Call MQTTPublishAsyncTask
-                SimpleAsyncTaskExecutor().execute(MQTTPublishAsyncTask(listOf(mqttEvent)))
+                SyncTaskExecutor().execute(MQTTPublishAsyncTask(listOf(mqttEvent)))
             }
         }
     }

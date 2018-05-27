@@ -9,6 +9,7 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.springframework.core.task.SimpleAsyncTaskExecutor
+import org.springframework.core.task.SyncTaskExecutor
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.*
@@ -89,7 +90,7 @@ class SentientMappingScheduledTask {
 
             if (valuesCurrent.isNotEmpty() && valuesAverage.isNotEmpty()) {
                 // Call SentientMappingEvaluationAsyncTask
-                SimpleAsyncTaskExecutor().execute(SentientMappingEvaluationAsyncTask(mapping, valuesCurrent, valuesAverage))
+                SyncTaskExecutor().execute(SentientMappingEvaluationAsyncTask(mapping, valuesCurrent, valuesAverage))
             }
         }
     }
