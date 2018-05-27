@@ -1,6 +1,7 @@
 package berlin.intero.sentientlighthub.mappingengine.tasks.async
 
 import berlin.intero.sentientlighthub.common.SentientProperties
+import berlin.intero.sentientlighthub.common.model.MQTTEvent
 import berlin.intero.sentientlighthub.common.model.mapping.Mapping
 import berlin.intero.sentientlighthub.common.model.mapping.conditions.AbsoluteThresholdCondition
 import berlin.intero.sentientlighthub.common.model.mapping.conditions.DynamicThresholdCondition
@@ -59,8 +60,10 @@ class SentientMappingEvaluationAsyncTask(
             action.apply {
                 val topic = "${SentientProperties.MQTT.Topic.LED}/${action.stripID}/${action.ledID}"
 
+                val mqttEvent = MQTTEvent(topic, action.value)
+
                 // Call MQTTPublishAsyncTask
-                SimpleAsyncTaskExecutor().execute(MQTTPublishAsyncTask(topic, action.value))
+                SimpleAsyncTaskExecutor().execute(MQTTPublishAsyncTask(listOf(mqttEvent)))
             }
         }
     }
