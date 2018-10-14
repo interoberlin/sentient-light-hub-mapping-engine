@@ -27,8 +27,14 @@ class SentientMappingScheduledTask {
     val valuesHistoric: MutableMap<String, Queue<String>?> = HashMap()
     val valuesAverage: MutableMap<String, String> = HashMap()
 
+    var valueReceived = false
+
     companion object {
         private val log: Logger = Logger.getLogger(SentientMappingScheduledTask::class.simpleName)
+
+        private var counter = 0
+        private var runtimeMin = Long.MAX_VALUE
+        private var runtimeMax = Long.MIN_VALUE
     }
 
     init {
@@ -39,6 +45,8 @@ class SentientMappingScheduledTask {
 
                 val checkerboardID = topic.split('/').last()
                 val value = String(message.payload)
+
+                valueReceived = true
 
                 handleValue(checkerboardID, value)
             }
@@ -84,14 +92,30 @@ class SentientMappingScheduledTask {
     @Scheduled(fixedDelay = SentientProperties.Frequency.SENTIENT_MAPPING_DELAY)
     @SuppressWarnings("unused")
     fun map() {
+        val startTime = System.currentTimeMillis()
         log.info("${SentientProperties.Color.TASK}-- SENTIENT MAPPING TASK${SentientProperties.Color.RESET}")
 
-        ConfigurationService.mappingConfig?.mappings?.forEach { mapping ->
+        if (valueReceived) {
+            valueReceived = false
+            ConfigurationService.mappingConfig?.mappings?.forEach { mapping ->
 
-            if (valuesCurrent.isNotEmpty() && valuesAverage.isNotEmpty()) {
-                // Call SentientMappingEvaluationAsyncTask
-                SyncTaskExecutor().execute(SentientMappingEvaluationAsyncTask(mapping, valuesCurrent, valuesAverage))
+                if (valuesCurrent.isNotEmpty() && valuesAverage.isNotEmpty()) {
+                    // Call SentientMappingEvaluationAsyncTask
+                    SyncTaskExecutor().execute(SentientMappingEvaluationAsyncTask(mapping, valuesCurrent, valuesAverage))
+                }
             }
+        } else {
+            log.info(".")
+            Thread.sleep(SentientProperties.Frequency.UNSUCCESSFUL_TASK_DELAY)
         }
+
+        val endTime = System.currentTimeMillis()
+        val runtime = endTime - startTime
+        if (counter > 0) {
+            if (runtime < runtimeMin) runtimeMin = runtime
+            if (runtime > runtimeMax) runtimeMax = runtime
+        }
+
+        log.info("-- End counter ${++counter} / ${runtime} millis / min ${runtimeMin} / max ${runtimeMax}")
     }
 }

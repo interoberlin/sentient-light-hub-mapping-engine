@@ -5,6 +5,7 @@ import berlin.intero.sentientlighthub.common.model.MQTTEvent
 import berlin.intero.sentientlighthub.common.model.mapping.Mapping
 import berlin.intero.sentientlighthub.common.model.mapping.conditions.AbsoluteThresholdCondition
 import berlin.intero.sentientlighthub.common.model.mapping.conditions.DynamicThresholdCondition
+import berlin.intero.sentientlighthub.common.model.mapping.conditions.EThresholdType
 import berlin.intero.sentientlighthub.common.tasks.MQTTPublishAsyncTask
 import org.springframework.core.task.SyncTaskExecutor
 import java.util.logging.Logger
@@ -51,7 +52,11 @@ class SentientMappingEvaluationAsyncTask(
                 fulfilled = condition.isFulfilled(checkerboardID, averageValue?.toIntOrNull(), value?.toIntOrNull())
 
                 if (fulfilled) {
-                    log.info("${SentientProperties.Color.CONDITION_TRIGGERED} TRIGGERED ${condition.thresholdType} ${SentientProperties.Color.RESET}")
+                    if (condition.thresholdType == EThresholdType.BELOW_AVERAGE) {
+                        log.info("${SentientProperties.Color.CONDITION_TRIGGERED_POS}TRIGGERED ${condition.thresholdType} ${SentientProperties.Color.RESET}")
+                    } else {
+                        log.info("${SentientProperties.Color.CONDITION_TRIGGERED_NEG}TRIGGERED ${condition.thresholdType} ${SentientProperties.Color.RESET}")
+                    }
                 }
             }
         }
